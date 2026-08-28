@@ -1,0 +1,35 @@
+[project]
+name = "mifa"
+version = "0.0.1"
+description = "MIFA - Missing-Aware Filtered ANN: experimental harness"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy",
+    "pandas",
+    "scipy",
+    "scikit-learn>=1.4",
+    "pyyaml",
+    "tqdm",
+    "matplotlib",
+    "pyarrow",
+    "faiss-cpu",
+    "hnswlib",
+    "h5py",
+    "numba>=0.66",
+    "socksio>=1.0",
+    "datasets",
+    "huggingface_hub",
+]
+
+[project.optional-dependencies]
+gpu = ["torch>=2.6"]
+embedding = ["torch>=2.6", "transformers>=4.51", "sentence-transformers"]
+dev = ["pytest>=9"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+norecursedirs = ["materials", "references", "baselines_src"]

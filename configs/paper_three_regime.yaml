@@ -1,0 +1,128 @@
+protocol:
+  name: paper-three-regime
+  version: release-v1
+  status: paper-release
+  seed_policy: fixed-seed-0
+
+split:
+  strategy: dataset_specific
+  fractions: {train: 0.50, validation: 0.20, calibration: 0.10, test: 0.20}
+  seed: 0x01352827
+  support_source: train_only
+  policy_selection_source: validation_only
+  threshold_selection_source: calibration_only
+  dataset_selection_source: paper_release_datasets
+  final_reporting_source: disjoint_fresh_final_queries_once
+
+workload:
+  profile: canonical
+  k_default: 10
+  query_training_queries: 100
+  source_disjoint: true
+  canonical_selectivity_weights: [0.50, 0.50, 0.00]
+
+query_sources:
+  books_v2:
+    kind: external_embeddings
+    corpus: amazon-c4
+    embeddings: data/processed/amazon_c4/query_emb_bgem3.npy
+    metadata: data/processed/amazon_c4/queries.parquet
+    category_column: target_category
+    category_value: Books
+    role_group_counts: {query_cls_training: 20, validation: 20, calibration: 10, test: 68}
+    predicate_attrs: [category, average_rating, rating_number]
+    canonical_signatures:
+      - {attrs: [category, average_rating], weight: 1}
+      - {attrs: [category, average_rating, rating_number], weight: 1}
+  movielens:
+    kind: heldout_content
+    predicate_attrs: [primary_genre, decade, avg_rating, n_genres]
+    canonical_signatures:
+      - {attrs: [avg_rating, decade, n_genres], weight: 1}
+      - {attrs: [primary_genre, decade, n_genres], weight: 1}
+  yelp:
+    kind: heldout_content
+    predicate_attrs: [state, primary_category, stars, review_count]
+    canonical_signatures:
+      - {attrs: [state, primary_category, stars], weight: 1}
+      - {attrs: [state, review_count], weight: 1}
+  amazon_c4:
+    kind: external_native_filters
+    corpus: amazon-c4
+    embeddings: data/processed/amazon_c4/query_emb_bgem3.npy
+    metadata: data/processed/amazon_c4/queries.parquet
+    role_group_counts: {query_cls_training: 600, validation: 300, calibration: 200, test: 1000}
+    predicate_attrs: [category]
+    canonical_signatures:
+      - {attrs: [category], weight: 1}
+    workload_family: amazon_c4_native_category
+    filter_atoms:
+      - {attr: category, op: eq, a_column: target_category}
+  wands:
+    kind: external_embeddings
+    corpus: wands-native-search-queries
+    embeddings: data/processed/final_main_assets/wands/query_emb_bgem3_1024.npy
+    role_group_counts: {query_cls_training: 96, validation: 96, calibration: 48, test: 240}
+    predicate_attrs: [product_class, average_rating]
+    canonical_signatures:
+      - {attrs: [product_class, average_rating], weight: 1}
+  appreviews:
+    kind: external_native_filters
+    corpus: bigvectorbench-appreviews
+    embeddings: data/processed/final_main_assets/appreviews/query_emb_bgem3_1024.npy
+    embeddings_by_tag:
+      jina_v5_mrl_d1024: data/processed/appreviews/query_emb_jina_v5_mrl_d1024.npy
+    metadata: data/processed/appreviews/queries.parquet
+    role_group_counts: {query_cls_training: 200, validation: 100, calibration: 100, test: 600}
+    predicate_attrs: [review_length, star_rating]
+    canonical_signatures:
+      - {attrs: [review_length, star_rating], weight: 1}
+    workload_family: appreviews_native_compound
+    filter_atoms:
+      - {attr: review_length, op: between, a_column: review_length_min, b_column: review_length_max}
+      - {attr: star_rating, op: between, a_column: star_rating_min, b_column: star_rating_max}
+  qdrant_hm:
+    kind: external_native_filters
+    corpus: qdrant-hm-native-filtered-queries
+    embeddings: data/processed/final_main_assets/qdrant_hm/query_emb_bgem3_1024.npy
+    metadata: data/processed/qdrant_hm/queries.parquet
+    role_group_counts: {query_cls_training: 200, validation: 100, calibration: 100, test: 600}
+    predicate_attrs: [department_name]
+    canonical_signatures:
+      - {attrs: [department_name], weight: 1}
+    workload_family: qdrant_hm_native_department
+    filter_atoms:
+      - {attr: department_name, op: eq, a_column: department_name}
+  arxiv:
+    kind: arxiv_native_mixed
+    repo: SPCL/arxiv-for-fanns-medium
+    predicate_attrs: [update_date, number_of_sub_categories]
+    canonical_signatures:
+      - {attrs: [update_date, number_of_sub_categories], weight: 1}
+  amazon_multi:
+    kind: heldout_content
+    predicate_attrs: [main_category, store]
+    attribute_missingness_weights: {main_category: 0.50, store: 0.50}
+    canonical_signatures:
+      - {attrs: [main_category, store], weight: 1}
+
+inference:
+  theta_grid: {start: 0.0, stop: 1.0, step: 0.01}
+  selection_uses_test_results: false
+
+artifacts:
+  report_stem: paper_three_regime
+  seed: 0
+  rho: 0.20
+  hidden_cells_per_incomplete_tuple: 1
+  final_test_runs_per_setting: 1
+  release_datasets:
+    - wands
+    - books_v2
+    - movielens
+    - yelp
+    - amazon_c4
+    - appreviews
+    - qdrant_hm
+    - arxiv
+    - amazon_multi

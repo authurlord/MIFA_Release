@@ -1,0 +1,22 @@
+# Amazon Books v2: predicate on the COARSE category (categories[1], ~41 values) instead of
+# the high-card leaf subcategory. Coarse category is strongly predictable from the embedding
+# cell (similar book texts -> same genre) + store, so the MIFA certificate fires and MIFA
+# beats Drop (the amazon_multi/main_category mechanism). store->category purity 0.991.
+dataset:
+  name: books_v2
+  loader: processed
+  path: data/processed/books_v2
+  metric: cosine
+  emb_file: emb_bgem3.npy
+  dtypes:
+    category: cat
+    subcategory: cat
+    store: cat
+    average_rating: num
+    rating_number: num
+  query_relevant_attrs: [category, average_rating, rating_number]
+eval:
+  n_queries: 300
+  out_dir: reports/
+k: 10
+rho: 0.10

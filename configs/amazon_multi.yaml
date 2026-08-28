@@ -1,0 +1,18 @@
+# Multi-category Amazon: store->main_category near-FD (brands category-exclusive).
+# main_category is the embedding-competing target; store is the rule evidence.
+dataset:
+  name: amazon_multi
+  loader: processed
+  path: data/processed/amazon_multi
+  metric: cosine
+  dtypes:
+    main_category: cat
+    store: cat
+    average_rating: num
+    rating_number: num
+  query_relevant_attrs: [main_category, average_rating]
+eval:
+  n_queries: 300
+  out_dir: reports/
+k: 10
+rho: 0.10

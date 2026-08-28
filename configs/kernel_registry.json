@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "purpose": "per-dataset dispatch for reproducible MIFA CPU/1-GPU/2-GPU execution",
+  "shared_exact_sources": [
+    "src/mifa/search/cpu_candidate_stream.py",
+    "src/mifa/search/unified_executor.py",
+    "src/mifa/inference/paper_policy.py",
+    "scripts/experiment_paper_aligned.py",
+    "scripts/run_release.py",
+    "scripts/run_multigpu_replicas.py"
+  ],
+  "rules": {
+    "default_exact_prewarm_strategy": "group_first",
+    "default_cpu_fused_exact_min_work": 0,
+    "no_global_strategy_override": true,
+    "one_gpu_latency": "standalone process on one local RTX 4090",
+    "standard_gpu_latency_scope": "unloaded exact single-request P50/P95",
+    "standard_gpu_qps_scope": "saturated exact full frozen-cohort batch throughput",
+    "two_gpu_latency": "maximum replica P50/P95",
+    "two_gpu_qps": "sum of concurrently measured saturated isolated-replica QPS",
+    "arxiv_large_1m": "paper Table-4 exact CPU and GPU replica configuration"
+  },
+  "datasets": [
+    {
+      "display": "WANDS",
+      "dataset_key": "wands",
+      "cpu_kernel": "numba_quantized_projection_fp32_refine",
+      "exact_prewarm_strategy": "group_first",
+      "cpu_fused_exact_min_work": 0,
+      "cpu_page_initial": 4096,
+      "gpu_kernel": "triton_exact_compact_pages",
+      "gpu_page_initial": 4096,
+      "gpu_deployment": "standalone 1-GPU process; two concurrent CPU/NUMA-isolated serving-process replicas"
+    },
+    {
+      "display": "Books",
+      "dataset_key": "books_v2",
+      "cpu_kernel": "numba_quantized_projection_fp32_refine",
+      "exact_prewarm_strategy": "group_first",
+      "cpu_fused_exact_min_work": 0,
+      "cpu_page_initial": 4096,
+      "gpu_kernel": "triton_exact_compact_pages",
+      "gpu_page_initial": 4096,
+      "gpu_deployment": "standalone 1-GPU process; two concurrent CPU/NUMA-isolated serving-process replicas"
+    },
+    {
+      "display": "MovieLens",
+      "dataset_key": "movielens",
+      "cpu_kernel": "numba_quantized_projection_fp32_refine",
+      "exact_prewarm_strategy": "group_first",
+      "cpu_fused_exact_min_work": 0,
+      "cpu_page_initial": 4096,
+      "gpu_kernel": "triton_exact_compact_pages",
+      "gpu_page_initial": 4096,
+      "gpu_deployment": "standalone 1-GPU process; two concurrent CPU/NUMA-isolated serving-process replicas"
+    },
+    {
+      "display": "Yelp",
+      "dataset_key": "yelp",
+      "cpu_kernel": "numba_exact_eligible_gather_resident_sgemv",
+      "exact_prewarm_strategy": "group_first",
+      "cpu_fused_exact_min_work": 0,
+      "cpu_page_initial": 4096,
+      "gpu_kernel": "triton_exact_compact_pages",
+      "gpu_page_initial": 4096,
+      "gpu_deployment": "standalone 1-GPU process; two concurrent CPU/NUMA-isolated serving-process replicas"
+    },
+    {
+      "display": "H&M",
+      "dataset_key": "qdrant_hm",
+      "cpu_kernel": "numba_exact_posting_first_fused",
+      "exact_prewarm_strategy": "posting_first",
+      "cpu_fused_exact_min_work": 4000000,
+      "cpu_page_initial": 64,
+      "gpu_kernel": "triton_exact_compact_pages",
+      "gpu_page_initial": 4096,
+      "gpu_deployment": "standalone 1-GPU process; two concurrent CPU/NUMA-isolated serving-process replicas"
+    },
+    {
+      "display": "Amazon-multi",
+      "dataset_key": "amazon_multi",
+      "cpu_kernel": "numba_quantized_projection_fp32_refine",
+      "exact_prewarm_strategy": "group_first",
+      "cpu_fused_exact_min_work": 0,
+      "cpu_page_initial": 4096,
+      "gpu_kernel": "triton_exact_compact_pages",
+      "gpu_page_initial": 4096,
+      "gpu_deployment": "standalone 1-GPU process; two concurrent CPU/NUMA-isolated serving-process replicas"
+    },
+    {
+      "display": "AppReviews",
+      "dataset_key": "appreviews",
+      "cpu_kernel": "numba_exact_fused_eligibility_distance_topk",
+      "exact_prewarm_strategy": "group_first",
+      "cpu_fused_exact_min_work": 4000000,
+      "cpu_page_initial": 64,
+      "gpu_kernel": "triton_exact_compact_pages",
+      "gpu_page_initial": 4096,
+      "gpu_deployment": "standalone 1-GPU process; two concurrent CPU/NUMA-isolated serving-process replicas"
+    },
+    {
+      "display": "Amazon-C4",
+      "dataset_key": "amazon_c4",
+      "cpu_kernel": "numba_exact_multiattribute_posting",
+      "exact_prewarm_strategy": "group_first",
+      "cpu_fused_exact_min_work": 0,
+      "cpu_page_initial": 64,
+      "gpu_kernel": "triton_exact_compact_pages",
+      "gpu_page_initial": 4096,
+      "gpu_deployment": "standalone 1-GPU process; two concurrent CPU/NUMA-isolated serving-process replicas"
+    },
+    {
+      "display": "ArXiv",
+      "dataset_key": "arxiv",
+      "cpu_kernel": "numba_exact_posting_first_fused",
+      "exact_prewarm_strategy": "posting_first",
+      "cpu_fused_exact_min_work": 4000000,
+      "cpu_page_initial": 64,
+      "gpu_kernel": "triton_exact_posting_first_compact_pages",
+      "gpu_page_initial": 4096,
+      "gpu_deployment": "standalone 1-GPU process; two concurrent CPU/NUMA-isolated serving-process replicas"
+    },
+    {
+      "display": "ArXiv-large-1M",
+      "dataset_key": "arxiv_large_unique_1m",
+      "cpu_kernel": "numba_exact_fused",
+      "gpu_kernel": "triton_exact_process_replicas",
+      "provenance": "paper_table_4"
+    }
+  ]
+}

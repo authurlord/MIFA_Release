@@ -1,0 +1,4 @@
+# Separate OpenAI-compatible embedding-server environment used by the paper
+# for BGE-M3 and Qwen3 native-MRL generation.  Install this in its own virtual
+# environment; vLLM manages its matching PyTorch/CUDA dependencies.
+vllm==0.17.1

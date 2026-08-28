@@ -1,0 +1,30 @@
+# MIFA core CPU dependencies used by the release environment.
+# Quick start:  conda create -n mifa python=3.11 && pip install -r requirements.txt
+# GPU box (V100/4090/...): also run the torch line below (cu124 wheels run on V100 sm_70+).
+
+# --- core (CPU): datasets, inference, exact/HNSW search, eval ---
+numpy==2.4.6
+pandas==3.0.3
+scipy==1.17.1
+scikit-learn==1.9.0          # RandomForest dependency imputer (= MissForest), PCA
+faiss-cpu==1.14.3            # exact + HNSW backends, big_table eligibility-method search
+hnswlib==0.8.0              # NSW graph for filtered-ANN
+pyarrow==24.0.0             # parquet dataset tables
+h5py==3.16.0                # HDF5 vector/query assets
+numba==0.66.0               # dataset-specialized CPU kernels
+socksio==1.0.0              # optional SOCKS transport used by download tools
+datasets==5.0.0            # HuggingFace dataset loaders (arxiv-for-fanns, Amazon-C4, ...)
+huggingface_hub==1.20.0
+PyYAML==6.0.3              # configs
+tqdm==4.68.3
+matplotlib==3.11.0
+pytest==9.1.0
+
+# --- GPU acceleration (optional but recommended; install separately) ---
+# pip install -r requirements-gpu.txt
+# torch==2.6.0+cu124    # MIFA_KNN_BACKEND=torch; mifa_multigpu.py; certificate_batch GPU search.
+#                       # cu124 wheels are compatible with V100 (sm_70), A100, RTX 40-series.
+
+# --- embedding generation (optional; only to re-embed datasets) ---
+# pip install -r requirements-embedding.txt
+# (Qwen3-Embedding-0.6B can be served via vLLM; see src/mifa/embed_client.py)

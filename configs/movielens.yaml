@@ -1,0 +1,21 @@
+# MovieLens 25M (384-d MiniLM on 'title [genres]'). Real dependency: top_tag -> genre,
+# decade <-> genre. Run scripts/prepare_movielens.py first to cache.
+dataset:
+  name: movielens
+  loader: processed
+  path: data/processed/movielens
+  metric: cosine
+  dtypes:
+    primary_genre: cat
+    top_tag: cat
+    decade: cat
+    n_genres: num
+    avg_rating: num
+    rating_count: num
+  # top_tag stays observed as rule evidence; predict genre/decade/rating from it
+  query_relevant_attrs: [primary_genre, decade, avg_rating, n_genres]
+eval:
+  n_queries: 300
+  out_dir: reports/
+k: 10
+rho: 0.10

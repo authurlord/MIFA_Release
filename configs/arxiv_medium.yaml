@@ -1,0 +1,25 @@
+# Tier-0 real dataset: arxiv-for-fanns-medium (100k arXiv abstracts, stella_en_400M_v5
+# embeddings, 11 real attributes, native EM/R/EMIS query workloads + ground truth).
+# Run scripts/prepare_arxiv.py once to cache; the loader prefers the verified
+# data/raw/arxiv-for-fanns-medium copy and falls back to the Hugging Face cache.
+dataset:
+  name: arxiv
+  loader: arxiv
+  hf_repo: SPCL/arxiv-for-fanns-medium
+  metric: cosine                  # stella embeddings -> cosine (L2-normalized)
+  # Flattened scalar attrs exposed to predicates / imputability:
+  #   main_category (cat, from main_categories[0]) -- should be embedding-imputable
+  #   update_date (num)            -- native R workload; weakly imputable (honest test)
+  #   number_of_authors (num), number_of_versions (num),
+  #   number_of_sub_categories (num), has_comments (cat), license (cat)
+  query_relevant_attrs:
+    - main_category
+    - update_date
+    - number_of_authors
+    - number_of_versions
+    - has_comments
+eval:
+  n_queries: 1000
+  out_dir: reports/
+k: 10
+rho: 0.10

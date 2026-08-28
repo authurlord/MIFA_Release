@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "seed": 0,
+  "rho": 0.2,
+  "k": 10,
+  "historical_beta_exp": 0.5,
+  "mechanisms": {
+    "mcar": "tuple_mcar",
+    "hce": "historical_candidate_exposure",
+    "qae": "tuple_query_answer_mnar"
+  },
+  "datasets": [
+    {
+      "key": "wands",
+      "display": "WANDS",
+      "dataset_config": "configs/wands_faithful.yaml",
+      "paper_config": "configs/paper_effectiveness.yaml",
+      "embedding": "",
+      "block_attrs": "product_class,average_rating",
+      "queries": [96, 48, 240],
+      "selected": {"structure": "p8_leaf128", "policy": "full_s10_k0", "theta": 0.23}
+    },
+    {
+      "key": "books_v2",
+      "display": "Books",
+      "dataset_config": "configs/books_v2.yaml",
+      "paper_config": "configs/paper_effectiveness.yaml",
+      "embedding": "bgem3",
+      "block_attrs": "category,average_rating",
+      "queries": [20, 10, 68],
+      "selected": {"structure": "p8_leaf128", "policy": "full_s10_k0", "theta": 0.60}
+    },
+    {
+      "key": "movielens",
+      "display": "MovieLens",
+      "dataset_config": "configs/movielens.yaml",
+      "paper_config": "configs/paper_effectiveness.yaml",
+      "embedding": "bgem3",
+      "block_attrs": "primary_genre,avg_rating",
+      "queries": [100, 50, 300],
+      "selected": {"structure": "p8_leaf128", "policy": "location_s10_k0", "theta": 0.27}
+    },
+    {
+      "key": "yelp",
+      "display": "Yelp",
+      "dataset_config": "configs/yelp.yaml",
+      "paper_config": "configs/paper_three_regime.yaml",
+      "embedding": "bgem3",
+      "block_attrs": "state,stars",
+      "queries": [100, 50, 300],
+      "selected": {"structure": "p8_leaf128", "policy": "full_body0_s10_k0", "theta": 0.53}
+    },
+    {
+      "key": "qdrant_hm",
+      "display": "H&M",
+      "dataset_config": "configs/qdrant_hm_faithful.yaml",
+      "paper_config": "configs/paper_effectiveness.yaml",
+      "embedding": "",
+      "block_attrs": "department_name",
+      "queries": [100, 100, 600],
+      "selected": {"structure": "p16_leaf128", "policy": "full_s10_k0", "theta": 0.21}
+    },
+    {
+      "key": "amazon_multi",
+      "display": "Amazon-multi",
+      "dataset_config": "configs/amazon_multi.yaml",
+      "paper_config": "configs/paper_effectiveness.yaml",
+      "embedding": "bgem3",
+      "block_attrs": "main_category,store",
+      "queries": [100, 50, 300],
+      "selected": {"structure": "p8_leaf128", "policy": "full_s10_k0", "theta": 0.11}
+    },
+    {
+      "key": "appreviews",
+      "display": "AppReviews",
+      "dataset_config": "configs/appreviews_faithful.yaml",
+      "paper_config": "configs/paper_three_regime.yaml",
+      "embedding": "jina_v5_mrl_d1024",
+      "block_attrs": "review_length,star_rating",
+      "queries": [100, 100, 600],
+      "selected": {"structure": "p8_leaf128", "policy": "location_s10_k0", "theta": 0.47}
+    },
+    {
+      "key": "amazon_c4",
+      "display": "Amazon-C4",
+      "dataset_config": "configs/amazon_c4.yaml",
+      "paper_config": "configs/paper_effectiveness.yaml",
+      "embedding": "bgem3",
+      "block_attrs": "category",
+      "queries": [300, 200, 1000],
+      "selected": {"structure": "p16_leaf128", "policy": "full_s10_k0", "theta": 0.31}
+    },
+    {
+      "key": "arxiv",
+      "display": "ArXiv",
+      "dataset_config": "configs/arxiv_medium.yaml",
+      "paper_config": "configs/paper_three_regime.yaml",
+      "embedding": "native",
+      "block_attrs": "update_date,number_of_sub_categories",
+      "queries": [200, 100, 1000],
+      "selected": {"structure": "p8_leaf128", "policy": "full_body1_s10_k0", "theta": 0.44}
+    }
+  ],
+  "arxiv_large": {
+    "repository": "SPCL/arxiv-for-fanns-large",
+    "revision": "79a4cff088965f7039b8766e6115a7769645adb2",
+    "url": "https://huggingface.co/datasets/SPCL/arxiv-for-fanns-large",
+    "fixed_revision_url": "https://huggingface.co/datasets/SPCL/arxiv-for-fanns-large/tree/79a4cff088965f7039b8766e6115a7769645adb2",
+    "released_scale": 1000000,
+    "dimension": 128,
+    "permutation": "frozen_release_v1",
+    "packaged": false
+  }
+}

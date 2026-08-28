@@ -1,0 +1,6 @@
+# GPU release environment plus libraries required to regenerate dense
+# embeddings from the documented Hugging Face checkpoints.
+-r requirements-gpu.txt
+transformers>=4.51,<6
+sentence-transformers>=4.1,<6
+requests>=2.32,<3

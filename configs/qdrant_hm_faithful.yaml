@@ -1,0 +1,16 @@
+dataset:
+  name: qdrant_hm
+  loader: processed
+  path: data/processed/qdrant_hm
+  metric: cosine
+  emb_file: ../final_main_assets/qdrant_hm/emb_bgem3_1024.npy
+  dtypes:
+    department_name: cat
+    product_type_name: cat
+    product_group_name: cat
+    colour_group_name: cat
+    section_name: cat
+    garment_group_name: cat
+  query_relevant_attrs: [department_name]
+k: 10
+rho: 0.10

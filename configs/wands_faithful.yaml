@@ -1,0 +1,16 @@
+dataset:
+  name: wands
+  loader: processed
+  path: data/processed/wands
+  metric: cosine
+  emb_file: ../final_main_assets/wands/emb_bgem3_1024.npy
+  dtypes:
+    product_class: cat
+    category: cat
+    subcategory: cat
+    rating_count: num
+    average_rating: num
+    review_count: num
+  query_relevant_attrs: [product_class, average_rating]
+k: 10
+rho: 0.10

@@ -1,0 +1,20 @@
+# Yelp Open Dataset (business metadata). Real FD: city -> state (functional, MIFA Sigma_ind).
+# Run scripts/prepare_yelp.py + embed_dataset.py first. Predicates over state/primary_category/
+# stars/review_count; city stays observed as rule evidence (city->state).
+dataset:
+  name: yelp
+  loader: processed
+  path: data/processed/yelp
+  metric: cosine
+  dtypes:
+    city: cat
+    state: cat
+    stars: num
+    review_count: num
+    primary_category: cat
+  query_relevant_attrs: [state, primary_category, stars, review_count]
+eval:
+  n_queries: 300
+  out_dir: reports/
+k: 10
+rho: 0.10

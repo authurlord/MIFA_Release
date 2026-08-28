@@ -1,0 +1,16 @@
+# Amazon-C4 (McAuley-Lab): single structured attr `category` (31 cats), faithful C4 query set.
+# Recall lives in scripts/amazon_c4_bench.py (real C4 queries); this config is for the QPS table
+# (sample_workload over category, exact-over-eligible + certificate timing).
+dataset:
+  name: amazon_c4
+  loader: processed
+  path: data/processed/amazon_c4
+  metric: cosine
+  dtypes:
+    category: cat
+  query_relevant_attrs: [category]
+eval:
+  n_queries: 300
+  out_dir: reports/
+k: 10
+rho: 0.10

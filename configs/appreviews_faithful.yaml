@@ -1,0 +1,13 @@
+dataset:
+  name: appreviews
+  loader: processed
+  path: data/processed/appreviews
+  metric: cosine
+  emb_file: ../final_main_assets/appreviews/emb_bgem3_1024.npy
+  dtypes:
+    package_name: cat
+    review_length: num
+    star_rating: num
+  query_relevant_attrs: [review_length, star_rating]
+k: 10
+rho: 0.10
