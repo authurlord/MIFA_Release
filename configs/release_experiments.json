@@ -38,7 +38,7 @@
       "embedding": "bgem3",
       "block_attrs": "primary_genre,avg_rating",
       "queries": [100, 50, 300],
-      "selected": {"structure": "p8_leaf128", "policy": "location_s10_k0", "theta": 0.27}
+      "selected": {"structure": "p4_leaf64", "policy": "full_body1_s5_k10", "theta": 0.21}
     },
     {
       "key": "yelp",
@@ -68,7 +68,7 @@
       "embedding": "bgem3",
       "block_attrs": "main_category,store",
       "queries": [100, 50, 300],
-      "selected": {"structure": "p8_leaf128", "policy": "full_s10_k0", "theta": 0.11}
+      "selected": {"structure": "p4_leaf128", "policy": "location_s10_k10", "theta": 0.66}
     },
     {
       "key": "appreviews",

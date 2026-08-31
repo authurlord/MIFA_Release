@@ -5455,6 +5455,11 @@ def main():
         "--external-query-embeddings", default="",
         help="explicit query-vector asset for the selected embedding tag")
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument(
+        "--injection-seed", type=int, default=None,
+        help=("optional missingness-only seed; dataset split, query sources, "
+              "workload, deployment, and ANN seeds remain controlled by "
+              "--seed"))
     parser.add_argument("--rho", type=float, default=0.10)
     parser.add_argument(
         "--missingness-kind", default="tuple_mcar",
@@ -5966,6 +5971,9 @@ def main():
         raise ValueError(
             "--candidate-page-maximum must be at least the initial size")
 
+    injection_seed = (
+        args.seed if args.injection_seed is None else args.injection_seed)
+
     paper_path = ROOT / args.paper_config
     dataset_path = ROOT / args.dataset_config
     paper_config = yaml.safe_load(paper_path.read_text())
@@ -6140,7 +6148,7 @@ def main():
             parts["train"].n, len(attrs), train_designated_indices,
             historical_query_descriptors, train_historical_candidates,
             beta_exp=args.historical_beta_exp,
-            rng=np.random.default_rng(args.seed * 100 + 1))
+            rng=np.random.default_rng(injection_seed * 100 + 1))
         train_audit_rhos = tuple(sorted({
             0.1, 0.2, 0.3, float(args.rho)}))
         train_nested_exposure_protocol = \
@@ -6148,12 +6156,12 @@ def main():
                 train_historical_priority, parts["train"].n, len(attrs),
                 rhos=train_audit_rhos)
         train_nested_exposure_protocol.update({
-            "priority_seed": int(args.seed * 100 + 1),
+            "priority_seed": int(injection_seed * 100 + 1),
             "actual_rho": float(args.rho),
         })
     train_observed, train_mask, _ = make_missing(
         parts["train"], args.rho, train_missingness_kind,
-        seed=args.seed * 100 + 1, block_size=args.block_size,
+        seed=injection_seed * 100 + 1, block_size=args.block_size,
         block_attrs=train_block_attrs, usage_freq=attribute_weights,
         answer_cells_per_tuple=args.answer_cells_per_tuple,
         historical_queries=historical_query_descriptors,
@@ -6194,7 +6202,7 @@ def main():
     elif args.workload_reference == "frozen_hce_beta100":
         frozen_reference, frozen_reference_mask, _ = make_missing(
             parts["train"], args.rho, "historical_candidate_exposure",
-            seed=args.seed * 100 + 1, block_size=args.block_size,
+            seed=injection_seed * 100 + 1, block_size=args.block_size,
             block_attrs=block_attrs, usage_freq=attribute_weights,
             historical_queries=historical_query_descriptors,
             historical_candidate_ids=train_historical_candidates_all,
@@ -6220,7 +6228,7 @@ def main():
         return _prepare_eval(
             parts[role], role=role, n_queries=count,
             k=result_k, rho=args.rho,
-            mask_seed=args.seed * 100 + mask_offset,
+            mask_seed=injection_seed * 100 + mask_offset,
             workload_seed=args.seed * 100 + workload_offset, attrs=attrs,
             predicate_reference=predicate_reference,
             missingness_kind=args.missingness_kind, block_size=args.block_size,
@@ -6848,6 +6856,7 @@ def main():
         "dataset": dataset_manifest,
         "protocol": paper_config.get("protocol", {}),
         "seed": int(args.seed),
+        "injection_seed": int(injection_seed),
         "rho_tuple": float(args.rho),
         "historical_evidence": {
             "fraction": float(args.historical_evidence_fraction),

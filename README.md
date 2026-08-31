@@ -99,6 +99,12 @@ bash scripts/inject_qae.sh all
 The resulting files are written under `data/injected/{mcar,hce,qae}`.  They can
 be packaged without embeddings using `scripts/package_release_data.py`.
 
+For missingness-only repetitions, pass `--injection-seed N` to
+`scripts/run_release.py`.  This varies the injected mask while retaining the
+paper's seed-0 split, query cohort, deployment policy, threshold, and kernel.
+The ordinary `--seed` inside the experiment runner controls all of those
+frozen experiment components and should remain zero for paper-table replay.
+
 ## Run on generated/injected data
 
 CPU, one dataset:

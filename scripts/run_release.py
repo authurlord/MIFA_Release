@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -54,9 +55,15 @@ def kernel_for(registry: dict, key: str) -> dict:
 
 
 def command_for(row: dict, kernel: dict, mechanism: str, platforms: str,
-                tag: str, export_only: bool) -> list[str]:
+                tag: str, export_only: bool,
+                injection_seed: int | None = None) -> list[str]:
     validation, calibration, test = row["queries"]
     projection, leaf = row["selected"]["structure"].split("_leaf", 1)
+    policy = row["selected"]["policy"]
+    policy_grid = re.search(r"_s(\d+)_k(\d+)$", policy)
+    if policy_grid is None:
+        raise ValueError(f"cannot derive support/shrinkage grid from {policy}")
+    support, shrinkage = policy_grid.groups()
     page_initial = (
         kernel["gpu_page_initial"]
         if platforms in {"1gpu", "2gpu"}
@@ -79,10 +86,10 @@ def command_for(row: dict, kernel: dict, mechanism: str, platforms: str,
         "--k", "10",
         "--projection-dims", projection.removeprefix("p"),
         "--leaf-capacities", leaf,
-        "--support-grid", "10",
-        "--shrinkage-grid", "0",
+        "--support-grid", support,
+        "--shrinkage-grid", shrinkage,
         "--policy-families", "global,location,scalar,full",
-        "--deployed-policy-candidate", row["selected"]["policy"],
+        "--deployed-policy-candidate", policy,
         "--deployed-theta", str(row["selected"]["theta"]),
         "--candidate-workers", "4",
         "--workload-reference", "complete_train",
@@ -94,6 +101,8 @@ def command_for(row: dict, kernel: dict, mechanism: str, platforms: str,
     ]
     if mechanism != "tuple_mcar":
         command.extend(("--block-attrs", row["block_attrs"]))
+    if injection_seed is not None:
+        command.extend(("--injection-seed", str(injection_seed)))
     if row["embedding"]:
         command.extend(("--emb", row["embedding"]))
     if not export_only:
@@ -129,6 +138,10 @@ def main() -> int:
     parser.add_argument("--export-injected-root", type=Path)
     parser.add_argument("--export-only", action="store_true")
     parser.add_argument("--tag", default="release")
+    parser.add_argument(
+        "--injection-seed", type=int,
+        help=("vary only injected missingness while retaining the frozen "
+              "seed-0 split, query cohort, deployment, and kernel"))
     args = parser.parse_args()
 
     config = load_json(MATRIX)
@@ -155,7 +168,8 @@ def main() -> int:
         kernel = kernel_for(registry, row["key"])
         tag = f"{args.tag}_{row['key']}_{args.mechanism}_{args.platforms}"
         command = command_for(
-            row, kernel, mechanism, platforms, tag, args.export_only)
+            row, kernel, mechanism, platforms, tag, args.export_only,
+            args.injection_seed)
         print(json.dumps({
             "dataset": row["key"],
             "mechanism": args.mechanism,
