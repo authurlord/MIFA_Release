@@ -33,6 +33,13 @@ def load_kernel_registry() -> dict:
     keys = [row.get("dataset_key") for row in registry.get("datasets", [])]
     if not keys or len(keys) != len(set(keys)):
         raise ValueError("kernel registry requires unique dataset keys")
+    for row in registry["datasets"]:
+        blas_threads = row.get("cpu_blas_threads")
+        if blas_threads is not None and (
+                not isinstance(blas_threads, int) or blas_threads < 1):
+            raise ValueError(
+                "cpu_blas_threads must be a positive integer for "
+                f"{row.get('dataset_key')}")
     return registry
 
 
@@ -52,6 +59,29 @@ def kernel_for(registry: dict, key: str) -> dict:
         if row["dataset_key"] == key:
             return row
     raise ValueError(f"no release kernel registered for {key}")
+
+
+def environment_for(base: dict[str, str], kernel: dict,
+                    platforms: str) -> dict[str, str]:
+    """Return the per-dataset serving environment.
+
+    The exact fused kernels use Numba for the full eligibility/distance scan,
+    but their small final FP32 refinement is a BLAS call.  Selected datasets
+    can therefore pin BLAS independently of the 32-thread Numba scan without
+    changing the query cohort or kernel dispatch.
+    """
+    env = dict(base)
+    env.setdefault("OMP_NUM_THREADS", "32")
+    env.setdefault("NUMBA_NUM_THREADS", "32")
+    env.setdefault("MKL_NUM_THREADS", "32")
+    env.setdefault("OPENBLAS_NUM_THREADS", "32")
+    requested = {item.strip() for item in platforms.split(",")}
+    blas_threads = kernel.get("cpu_blas_threads")
+    if "cpu" in requested and blas_threads is not None:
+        threads = str(blas_threads)
+        env["MKL_NUM_THREADS"] = threads
+        env["OPENBLAS_NUM_THREADS"] = threads
+    return env
 
 
 def command_for(row: dict, kernel: dict, mechanism: str, platforms: str,
@@ -149,10 +179,6 @@ def main() -> int:
     mechanism = config["mechanisms"][args.mechanism]
     platforms = "cpu,1gpu,2gpu" if args.platforms == "all" else args.platforms
     env = dict(os.environ)
-    env.setdefault("OMP_NUM_THREADS", "32")
-    env.setdefault("NUMBA_NUM_THREADS", "32")
-    env.setdefault("MKL_NUM_THREADS", "32")
-    env.setdefault("OPENBLAS_NUM_THREADS", "32")
     if args.injected_root:
         env["MIFA_INJECTED_DATA_ROOT"] = str(args.injected_root.resolve())
     if args.export_injected_root:
@@ -166,6 +192,7 @@ def main() -> int:
 
     for row in selected_datasets(config, args.datasets):
         kernel = kernel_for(registry, row["key"])
+        dataset_env = environment_for(env, kernel, platforms)
         tag = f"{args.tag}_{row['key']}_{args.mechanism}_{args.platforms}"
         command = command_for(
             row, kernel, mechanism, platforms, tag, args.export_only,
@@ -179,9 +206,16 @@ def main() -> int:
                 "cpu": kernel["cpu_kernel"],
                 "gpu": kernel["gpu_kernel"],
             },
+            "runtime_threads": {
+                "omp": dataset_env.get("OMP_NUM_THREADS"),
+                "numba": dataset_env.get("NUMBA_NUM_THREADS"),
+                "mkl": dataset_env.get("MKL_NUM_THREADS"),
+                "openblas": dataset_env.get("OPENBLAS_NUM_THREADS"),
+            },
             "command": command,
         }), flush=True)
-        completed = subprocess.run(command, cwd=ROOT, env=env, check=False)
+        completed = subprocess.run(
+            command, cwd=ROOT, env=dataset_env, check=False)
         if completed.returncode:
             return completed.returncode
     return 0
