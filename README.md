@@ -1,3 +1,5 @@
+Full version of this paper is at [Full](MIFA-full.pdf).
+
 # MIFA code release
 
 This repository contains the MIFA implementation, the dataset-specific exact
